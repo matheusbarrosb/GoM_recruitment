@@ -51,3 +51,5 @@ rsconnect/
 # Mac memory file
 .DS_Store
 
+# Testing script
+testing.R

@@ -1,6 +1,7 @@
-make_input_data = function(raw_data, species_list) {
+make_input_data = function(raw_data, species_list, standardize = TRUE) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
+  if(!require(dplyr)) install.packages("Thermimage") else require(Thermimage)
   
   # Format data ----------------------------------------------------------------
   filtered_data = raw_data %>%
@@ -32,9 +33,30 @@ make_input_data = function(raw_data, species_list) {
   n_trends     = 1
   n_pos        = dim(filtered_data)[1]
   
+  
+  # standardization
+  if (standardize == TRUE) {
+    
+    means   = rep(NA, S)
+    split_y = list()
+    for (i in 1:S) {
+      
+      means[i]    = bin_mean(y, every = 30)[i]
+      
+    }
+    
+    split_y = split(y, ceiling(seq_along(y)/N))
+    
+    split_y_std = list()
+    for (i in 1:S) split_y_std[[i]] = as.numeric(unlist(split_y[i]))/means[i]
+    
+    y = unlist(split_y_std)
+
+  }
+  
   # indexing
   row_indx_pos = matrix((rep(1:M, N)), M, N)[which(!is.na(y))]
-  col_indx_pos  = matrix(sort(rep(1:N, M)), M, N)[which(!is.na(y))]
+  col_indx_pos = matrix(sort(rep(1:N, M)), M, N)[which(!is.na(y))]
   
   
   est_A = rep(1, M)

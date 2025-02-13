@@ -25,10 +25,10 @@ parameters {
   
   vector[S]                              x0;              // initial states
   vector<lower=2>[est_nu]                nu;              // nu, constrainted to be > 2
-  matrix <lower=-3,upper=3>[N-1,S]       pro_dev;
+  matrix <lower=-3,upper=3>[N-1,S]       pro_dev;         // process deviations
   vector[n_trends]                       U;
   vector[n_A]                            A; 
-  array [n_provar]real<lower=0,upper=1>  sigma_process;   // process variation
+  array [n_provar]real<lower=0,upper=1>  sigma_process;   // process variation (SD)
   array [n_obsvar]real<lower=0>          sigma_obs;       // observation variation
   real<lower=0,upper=1>                  phi;
   
@@ -67,7 +67,7 @@ transformed parameters {
   
   for(t in 2:N) {
     for(s in 1:S) {
-    
+      // process equation
       x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1]; 
       
       if(est_trend == 1) {

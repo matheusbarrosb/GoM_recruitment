@@ -1,4 +1,4 @@
-make_input_data = function(raw_data, species_list, standardize = TRUE) {
+make_input_data = function(raw_data, species_list, standardize = TRUE, shared_trends = TRUE) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
   if(!require(dplyr)) install.packages("Thermimage") else require(Thermimage)
@@ -26,8 +26,8 @@ make_input_data = function(raw_data, species_list, standardize = TRUE) {
   proVariances = c(rep(1, M), 0)
   obsVariances = rep(1, M)
   trends       = proVariances
-  est_trend    = TRUE
-  est_nu       = TRUE
+  est_trend    = shared_trends
+  est_nu       = 1
   family       = 1
   n_provar     = 1
   n_trends     = 1
@@ -41,7 +41,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE) {
     split_y = list()
     for (i in 1:S) {
       
-      means[i]    = bin_mean(y, every = 30)[i]
+      means[i] = bin_mean(y, every = 30)[i]
       
     }
     
@@ -55,9 +55,10 @@ make_input_data = function(raw_data, species_list, standardize = TRUE) {
   }
   
   # indexing
-  row_indx_pos = matrix((rep(1:M, N)), M, N)[which(!is.na(y))]
-  col_indx_pos = matrix(sort(rep(1:N, M)), M, N)[which(!is.na(y))]
-  
+  # row_indx_pos = matrix((rep(1:M, N)), M, N)[which(!is.na(y))]
+  # col_indx_pos = matrix(sort(rep(1:N, M)), M, N)[which(!is.na(y))]
+  row_indx_pos = as.numeric(as.factor(filtered_data$species))
+  col_indx_pos = as.numeric(as.factor(filtered_data$year))
   
   est_A = rep(1, M)
   for (i in 1:max(states)) {
@@ -71,7 +72,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE) {
   est_A = c(est_A, 0, 0)
   n_A   = length(est_A) - 2
   
-  output = list(
+  data_list = list(
     N = N,
     M = M,
     y = y,
@@ -92,6 +93,9 @@ make_input_data = function(raw_data, species_list, standardize = TRUE) {
     trends = trends,
     family = family
   )
+  
+  
+  output = list(filtered_data, data_list)
   
   return(output)
   

@@ -16,10 +16,29 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   
   names(filtered_data) = c("species", "year", "y", "sd", "se")
   
+  # fill in missing years with NAs ---------------------------------------------
+  min_year  = 1981
+  max_year  = 2018
+  all_years = expand.grid(species = unique(filtered_data$species),
+                          year    = min_year:max_year)
   
-  N            = length(unique(filtered_data$year))
-  M            = length(unique(filtered_data$species))
-  y            = filtered_data$y
+  df_filled = all_years %>%
+    left_join(filtered_data, by = c("species", "year")) %>%
+    arrange(species, year)
+  
+  # Data inputation ------------------------------------------------------------
+  y = df_filled$y
+  for (i in 2:length(y)) {
+    
+      if (is.na(y[i])) y[i] = y[i-1] + rnorm(1, 0, sd =  y[i-1]*0.1)
+    
+  }
+  
+  
+  # ----------------------------------------------------------------------------
+  N            = length(unique(df_filled$year))
+  M            = length(unique(df_filled$species))
+  y            = y
   states       = 1:M
   S            = M
   n_obsvar     = 1
@@ -31,17 +50,17 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   family       = 1
   n_provar     = 1
   n_trends     = 1
-  n_pos        = dim(filtered_data)[1]
+  n_pos        = dim(df_filled)[1]
   
   
-  # standardization
+  # standardization ------------------------------------------------------------
   if (standardize == TRUE) {
     
     means   = rep(NA, S)
     split_y = list()
     for (i in 1:S) {
       
-      means[i] = bin_mean(y, every = 30)[i]
+      means[i] = bin_mean(y, every = N)[i]
       
     }
     
@@ -52,14 +71,13 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
     
     y = unlist(split_y_std)
 
-  }
+  } else y = y
   
-  # indexing
-  # row_indx_pos = matrix((rep(1:M, N)), M, N)[which(!is.na(y))]
-  # col_indx_pos = matrix(sort(rep(1:N, M)), M, N)[which(!is.na(y))]
-  row_indx_pos = as.numeric(as.factor(filtered_data$species))
-  col_indx_pos = as.numeric(as.factor(filtered_data$year))
+  # indexing -------------------------------------------------------------------
+  row_indx_pos = as.numeric(as.factor(df_filled$species))
+  col_indx_pos = as.numeric(as.factor(df_filled$year))
   
+  # ----------------------------------------------------------------------------
   est_A = rep(1, M)
   for (i in 1:max(states)) {
     
@@ -73,29 +91,31 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   n_A   = length(est_A) - 2
   
   data_list = list(
-    N = N,
-    M = M,
-    y = y,
-    states = states,
-    S = S,
-    n_obsvar = n_obsvar,
+    
+    N            = N,
+    M            = M,
+    y            = y,
+    states       = states,
+    S            = S,
+    n_obsvar     = n_obsvar,
     proVariances = proVariances,
     obsVariances = obsVariances,
-    n_provar = n_provar,
-    n_trends = n_trends,
-    n_pos = n_pos,
+    n_provar     = n_provar,
+    n_trends     = n_trends,
+    n_pos        = n_pos,
     row_indx_pos = row_indx_pos,
     col_indx_pos = col_indx_pos,
-    est_trend = est_trend,
-    est_A = est_A,
-    est_nu =est_nu,
-    n_A = n_A,
-    trends = trends,
-    family = family
+    est_trend    = est_trend,
+    est_A        = est_A,
+    est_nu       = est_nu,
+    n_A          = n_A,
+    trends       = trends,
+    family       = family
+    
   )
   
-  
-  output = list(filtered_data, data_list)
+  output = list(data_list, df_filled)
+  names(output) = c("stan_input", "df")
   
   return(output)
   

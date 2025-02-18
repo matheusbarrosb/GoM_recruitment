@@ -76,7 +76,7 @@ for (k in 1:K) {
       
       if(est_trend == 1) {
       
-        x[t,s] = x[t,s] + Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
+        x[t,s] = x[t-1,s] + Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
      
         }
       }
@@ -111,7 +111,7 @@ model {
   }
   
   for(i in 1:n_trends) {
-      U[i] ~ normal(0,0.1); 
+      U[i] ~ normal(0, 0.1); 
   }
   
   
@@ -166,10 +166,16 @@ model {
 generated quantities {
   
   vector[n_pos] log_lik;
+  matrix[N, S]   lambda;
 
   if(family==1) for (n in 1:n_pos) log_lik[n] = normal_lpdf(y[n] | pred[col_indx_pos[n], row_indx_pos[n]], sigma_obs[obsVariances[row_indx_pos[n]]]);
   // if(family==2) for (n in 1:n_pos) log_lik[n] = bernoulli_lpmf(y_int[n] | inv_logit(pred[col_indx_pos[n], row_indx_pos[n]]));
   // if(family==3) for (n in 1:n_pos) log_lik[n] = poisson_lpmf(y_int[n] | exp(pred[col_indx_pos[n], row_indx_pos[n]]));
   if(family==4) for (n in 1:n_pos) log_lik[n] = gamma_lpdf(y[n] | sigma_obs[obsVariances[row_indx_pos[n]]], sigma_obs[obsVariances[row_indx_pos[n]]] ./ exp(pred[col_indx_pos[n], row_indx_pos[n]]));
   if(family==5) for (n in 1:n_pos) log_lik[n] = lognormal_lpdf(y[n] | pred[col_indx_pos[n], row_indx_pos[n]], sigma_obs[obsVariances[row_indx_pos[n]]]);
+  
+  for (s in 1:S){ 
+    for (t in 2:N) lambda[t,s] = (pred[t,s] - pred[t-1,s])/(t - (t-1));
+    }
+  
 }

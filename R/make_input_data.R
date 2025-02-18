@@ -1,7 +1,7 @@
 make_input_data = function(raw_data, species_list, standardize = TRUE, shared_trends = TRUE) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
-  if(!require(dplyr)) install.packages("Thermimage") else require(Thermimage)
+  if(!require(Thermimage)) install.packages("Thermimage") else require(Thermimage)
   
   # Format data ----------------------------------------------------------------
   filtered_data = raw_data %>%
@@ -55,11 +55,11 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   proVariances = c(rep(1, M), 0)
   obsVariances = rep(1, M)
   trends       = proVariances
-  est_trend    = shared_trends
+  est_trend    = ifelse(shared_trends == TRUE, 1, 0)
   est_nu       = 1
   family       = 1
   n_provar     = 1
-  n_trends     = 1
+  n_trends     = S
   n_pos        = dim(df_filled)[1]
   
   # Data inputation ------------------------------------------------------------

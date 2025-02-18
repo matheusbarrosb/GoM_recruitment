@@ -26,6 +26,7 @@ plot_fits_to_data = function(stan_input, fit, species_list) {
     ylab("Mean recruitment index") +
     facet_wrap(~spps, scales = "free_y") +
     theme(legend.title = element_blank(),
-          legend.position = "top")
+          legend.position = "top",
+          strip.text.x = element_text(face = "italic"))
   
 }

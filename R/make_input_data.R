@@ -7,14 +7,18 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   filtered_data = raw_data %>%
     filter(Genus_species %in% species_list) %>%
     group_by(Genus_species, YEAR, MONTH, STATION, DAY) %>%
-    summarise(n = Total_NUM) %>%
+    summarise(n = Total_NUM,
+              sal  = SAL,
+              do   = O2_MG_L,
+              temp = Temp_C) %>%
     na.exclude() %>%
     group_by(Genus_species, YEAR) %>%
     summarise(mean_count = mean(n, na.rm = TRUE),
-              sd         = sd(n, na.rm = TRUE),
-              se         = sd/sqrt(n()))
+              sal        = mean(sal, na.rm = TRUE),
+              do         = mean(do, na.rm = TRUE),
+              temp       = mean(temp, na.rm = TRUE))
   
-  names(filtered_data) = c("species", "year", "y", "sd", "se")
+  names(filtered_data) = c("species", "year", "y", "sal", "do", "temp")
   
   # fill in missing years with NAs ---------------------------------------------
   min_year  = 1981
@@ -36,8 +40,14 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   
   
   # ----------------------------------------------------------------------------
+  previous_na_action = options('na.action')
+  options(na.action = 'na.pass')
+  
+  
   N            = length(unique(df_filled$year))
   M            = length(unique(df_filled$species))
+  X            = model.matrix(~ df_filled$sal + df_filled$do + df_filled$temp)
+  K            = dim(X)[2]
   y            = y
   states       = 1:M
   S            = M
@@ -52,6 +62,10 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   n_trends     = 1
   n_pos        = dim(df_filled)[1]
   
+  # Data inputation ------------------------------------------------------------
+  for (k in 1:K) {
+    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k]
+  }
   
   # standardization ------------------------------------------------------------
   if (standardize == TRUE) {
@@ -95,6 +109,8 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
     N            = N,
     M            = M,
     y            = y,
+    X            = X,
+    K            = K,
     states       = states,
     S            = S,
     n_obsvar     = n_obsvar,
@@ -113,6 +129,8 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
     family       = family
     
   )
+  
+  options(na.action=previous_na_action$na.action)
   
   output = list(data_list, df_filled)
   names(output) = c("stan_input", "df")

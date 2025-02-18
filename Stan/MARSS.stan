@@ -2,6 +2,7 @@ data {
   
   int<lower=0>              N;              // number of years
   int<lower=0>              M;              // number of time series
+  int<lower=0>              K;              // number of covariates
   array [M]int<lower=0>     states;
   int<lower=0>              S;              // number of states
   array [M]int<lower=0>     obsVariances;   // observation variance map
@@ -19,6 +20,7 @@ data {
   array [n_A+2]int<lower=0> est_A;
   vector[n_pos]             y;              // data
   int                       family;         // 1 = normal, 2 = binomial, 3 = poisson, 4 = gamma, 5 = lognormal
+  matrix[n_pos, K]          X;              // design matrix of covariates
   
 }
 parameters {
@@ -31,13 +33,14 @@ parameters {
   array [n_provar]real<lower=0,upper=1>  sigma_process;   // process variation (SD)
   array [n_obsvar]real<lower=0>          sigma_obs;       // observation variation
   real<lower=0,upper=1>                  phi;
+  matrix[K, S]                           B;               // coefficients
   
 }
 transformed parameters {
   
   real<lower=0>          sigma_process_real = sigma_obs[1]*sigma_process[1];
   matrix[N, M]           pred;
-  matrix[N,S]            x; // elements accessed [N,K]
+  matrix[N,S]            x; 
   vector[S]              Uvec;
   vector[M]              Avec;
   real<lower=-1,upper=1> phi_real = 2*phi - 1;
@@ -65,15 +68,17 @@ transformed parameters {
     
   }  
   
+for (k in 1:K) {
   for(t in 2:N) {
     for(s in 1:S) {
       // process equation
-      x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1]; 
+      x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
       
       if(est_trend == 1) {
       
-        x[t,s] = x[t,s] + Uvec[s];
+        x[t,s] = x[t,s] + Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
      
+        }
       }
     }
   }
@@ -91,6 +96,7 @@ model {
 
 // PRIORS ---------------------------------------------------------------------
   phi ~ beta(1.5,1.5) T[1e-4,1];
+  for (k in 1:K) B[k,] ~ normal(0, 2);
   
   for(i in 1:n_obsvar) {
     
@@ -136,6 +142,7 @@ model {
       }
     }
   }
+
 
   // LIKELIHOODS ---------------------------------------------------------------
   if(family == 1) {

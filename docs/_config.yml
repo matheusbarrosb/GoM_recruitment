@@ -1,0 +1,13 @@
+# _config.yml
+title: GoM Recruitment
+description: Documentation for GoM Recruitment Project
+theme: minima
+
+# Optional: Specify the markdown processor (default is kramdown)
+markdown: kramdown
+
+# Optional: Set the base URL if your site is not at the root of the domain
+# baseurl: "/GoM_recruitment"
+
+# Optional: URL of your site
+# url: "https://<username>.github.io"

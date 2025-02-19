@@ -12,7 +12,7 @@ selected_spps = list(spp_list[33], spp_list[34], spp_list[35], spp_list[70],
                      spp_list[303], spp_list[480], spp_list[376], spp_list[173],
                      spp_list[84], spp_list[174], spp_list[251], spp_list[124],
                      spp_list[123], spp_list[230], spp_list[283], spp_list[262],
-                     spp_list[452])
+                     spp_list[452], spp_list[180])
 
 
 raw_data %>%

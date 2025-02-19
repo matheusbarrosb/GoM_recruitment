@@ -39,6 +39,6 @@ plot_covariate_effects = function(fit, species_list, stan_input) {
                                  "Positive effect" = "blue")) +
     ylab("Parameter value") +
     xlab("")
-  
+
   
 }

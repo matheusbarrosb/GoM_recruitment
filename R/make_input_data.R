@@ -1,4 +1,4 @@
-make_input_data = function(raw_data, species_list, standardize = TRUE, shared_trends = TRUE) {
+make_input_data = function(raw_data, species_list, standardize = TRUE, shared_trends = FALSE) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
   if(!require(Thermimage)) install.packages("Thermimage") else require(Thermimage)
@@ -38,11 +38,9 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
     
   }
   
-  
   # ----------------------------------------------------------------------------
   previous_na_action = options('na.action')
   options(na.action = 'na.pass')
-  
   
   N            = length(unique(df_filled$year))
   M            = length(unique(df_filled$species))
@@ -64,7 +62,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   
   # Data inputation ------------------------------------------------------------
   for (k in 1:K) {
-    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k]
+    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] # missing value = value at t-1
   }
   
   # standardization ------------------------------------------------------------
@@ -72,11 +70,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
     
     means   = rep(NA, S)
     split_y = list()
-    for (i in 1:S) {
-      
-      means[i] = bin_mean(y, every = N)[i]
-      
-    }
+    for (i in 1:S) means[i] = bin_mean(y, every = N)[i]
     
     split_y = split(y, ceiling(seq_along(y)/N))
     

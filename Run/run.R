@@ -23,15 +23,20 @@ input_data = make_input_data(raw_data      = raw_data,
                              species_list  = selected_spps,
                              standardize   = TRUE, 
                              shared_trends = FALSE)
-mcmc_list = list(n_mcmc = 1000, n_burn = 100, n_chain = 2,
-                  n_thin = 1, step_size = 0.4, adapt_delta = 0.9)
+
+mcmc_list = list(n_mcmc      = 1000,
+                 n_burn      = 100,
+                 n_chain     = 2,
+                 n_thin      = 1,
+                 step_size   = 0.4,
+                 adapt_delta = 0.9)
 
 model_directory = file.path(here::here(), "Stan", "MARSS.stan")
 model_file      = cmdstan_model(model_directory)
 
 fit = model_file$sample(
   data            = input_data$stan_input,
-  seed            = 2025,
+  seed            = 2000,
   chains          = mcmc_list$n_chain,
   parallel_chains = mcmc_list$n_chain,
   iter_warmup     = mcmc_list$n_burn,
@@ -41,7 +46,6 @@ fit = model_file$sample(
   refresh         = 100,
   max_treedepth   = 20
 )
-
 
 plot_fits_to_data(stan_input   = input_data$stan_input,
                   fit          = fit,

@@ -34,7 +34,7 @@ parameters {
   array [n_obsvar]real<lower=0>          sigma_obs;       // observation variation
   real<lower=0,upper=1>                  phi;
   matrix[K, S]                           B;               // coefficients
-  
+
 }
 transformed parameters {
   

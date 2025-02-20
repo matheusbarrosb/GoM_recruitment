@@ -34,7 +34,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   y = df_filled$y
   for (i in 2:length(y)) {
     
-      if (is.na(y[i])) y[i] = y[i-1] + rnorm(1, 0, sd =  y[i-1]*0.1)
+      if (is.na(y[i])) y[i] = y[i-1] + rnorm(1, 0, 0.05)
     
   }
   
@@ -62,7 +62,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   
   # Data inputation ------------------------------------------------------------
   for (k in 1:K) {
-    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] # missing value = value at t-1
+    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] + rnorm(1, 0, 0.05) # missing value = value at t-1
   }
   
   # standardization ------------------------------------------------------------

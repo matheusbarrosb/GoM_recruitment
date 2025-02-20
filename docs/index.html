@@ -11,7 +11,7 @@
 
 
 
-<title>index</title>
+<title>The modelling framework</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -348,12 +348,14 @@ display: none;
 
 
 
+<h1 class="title toc-ignore">The modelling framework</h1>
 
 </div>
 
 
-<div id="about" class="section level1">
-<h1><strong>About</strong></h1>
+<div id="the-multivariate-autoregressive-state-space-model-marss" class="section level1">
+<h1><strong>The Multivariate Autoregressive State Space Model
+(MARSS)</strong></h1>
 <p>This project aims to model the interannual variation in recruitment
 dynamics for several ecologically, economically important fish species.
 I’m using a Multivariate Autoregressive State Space Model (MARSS) with
@@ -363,7 +365,8 @@ observation components by estimating separate variances. In a population
 dynamics context, the process component refers to true changes in
 population abundance through time. The observation compoenent is then
 modelled with additional error to account for the inherent variability
-related to sampling errors.</p>
+related to sampling errors. The model also includes the effects of
+covariates on the unobserved population abundance.</p>
 <p>The model can be described as follows:</p>
 <p><span class="math display">\[\begin{align}
 
@@ -385,6 +388,23 @@ x_{t} = x_{t-1} + \beta_{k,s}X_{t,k} + \sigma_{pr}
 \sigma_{pr} \sim MVN(0, R_{t})
 
 \end{align}\]</span></p>
+<p><span class="math inline">\(y_{t}\)</span> = observed mean count at
+year <em>t</em><br />
+<span class="math inline">\(\sigma_{obs}\)</span> = observation
+variance<br />
+<span class="math inline">\(Q_{t}\)</span> = observation variance
+covariance matrix<br />
+<span class="math inline">\(x_{t}\)</span> = unobserved state
+(<em>i.e.</em> the true population abundance at year <em>t</em>)<br />
+<span class="math inline">\(\beta_{k,s}\)</span> = effects of covariate
+<em>k</em> on species <em>s</em><br />
+<span class="math inline">\(X_{t,k}\)</span> = design matrix of
+covariates<br />
+<span class="math inline">\(\sigma_{pr}\)</span> = process
+variance<br />
+<span class="math inline">\(R_{t}\)</span> = process variance covariance
+matrix<br />
+</p>
 </div>
 
 

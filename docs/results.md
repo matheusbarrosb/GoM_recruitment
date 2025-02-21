@@ -5,8 +5,6 @@ date: "2025-02-20"
 output: html_document
 ---
 
-## Results
-
 <nav>
   <ul>
     <li><a href="index.html">Home</a></li>
@@ -18,6 +16,8 @@ output: html_document
     </li>
   </ul>
 </nav>
+
+## Results
 
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/fits_to_data.png" style="display: block; margin: auto;" />
 

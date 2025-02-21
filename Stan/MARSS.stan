@@ -23,6 +23,7 @@ data {
   matrix[n_pos, K]          X;              // design matrix of covariates
   
 }
+
 parameters {
   
   vector[S]                              x0;              // initial states
@@ -36,6 +37,7 @@ parameters {
   matrix[K, S]                           B;               // coefficients
 
 }
+
 transformed parameters {
   
   real<lower=0>          sigma_process_real = sigma_obs[1]*sigma_process[1];
@@ -64,7 +66,7 @@ transformed parameters {
   
   for(s in 1:S) {
     
-    x[1,s] = x0[s]; // assign initial states
+    x[1,s] = x0[s]; // assign initial states. Maybe needs a prior?
     
   }  
   
@@ -76,7 +78,7 @@ for (k in 1:K) {
       
       if(est_trend == 1) {
       
-        x[t,s] = x[t-1,s] + Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
+        x[t,s] = x[t-1,s] * Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
      
         }
       }
@@ -92,6 +94,7 @@ for (k in 1:K) {
     }
   }
 }
+
 model {
 
 // PRIORS ---------------------------------------------------------------------
@@ -99,21 +102,11 @@ model {
   
   for (k in 1:K) B[k,] ~ normal(0, 2);
   
-  for(i in 1:n_obsvar) {
-    
-    sigma_obs[i] ~ normal(0,2) T[1e-3,1e2]; 
-    
-  }
+  for(i in 1:n_obsvar) sigma_obs[i] ~ normal(0, 2) T[1e-3,1e2]; 
   
-  for(s in 1:n_provar) {
-    
-    sigma_process[s] ~ beta(1,1) T[0,1]; 
-    
-  }
+  for(s in 1:n_provar) sigma_process[s] ~ beta(1, 1) T[0,1]; 
   
-  for(i in 1:n_trends) {
-      U[i] ~ normal(0, 0.1); 
-  }
+  for(i in 1:n_trends) U[i] ~ normal(0, 0.1); 
   
   
   if(est_nu ==1) {
@@ -164,6 +157,7 @@ model {
     for(i in 1:n_pos) y[i] ~ lognormal(pred[col_indx_pos[i], row_indx_pos[i]], sigma_obs[obsVariances[row_indx_pos[i]]]);
   }
 }
+
 generated quantities {
   
   vector[n_pos] log_lik;

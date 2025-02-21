@@ -45,20 +45,28 @@ fit = model_file$sample(
   step_size       = 0.05,
   refresh         = 100,
   max_treedepth   = 20
-)
+); fit$cmdstan_diagnose() # check convergence diagnostics
+
+figure_directory = file.path(here::here(), "Figures")
 
 plot_fits_to_data(stan_input   = input_data$stan_input,
                   fit          = fit,
                   species_list = selected_spps)
 
+ggsave("fits_to_data.png", width = 9.2, height = 5.5, path = figure_directory)
+
 plot_growth_rates(fit          = fit,
                   species_list = selected_spps,
                   stan_input   = input_data$stan_input)
 
+ggsave("lambdas.png", width = 6, height = 5.5, path = figure_directory)
 
 plot_covariate_effects(fit          = fit,
                        species_list = selected_spps, 
                        stan_input   = input_data$stan_input)
+
+ggsave("covariates.png", width = 10.4, height = 5.5, path = figure_directory)
+
 
 
 

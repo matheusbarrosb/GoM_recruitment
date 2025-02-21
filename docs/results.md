@@ -17,8 +17,6 @@ output: html_document
   </ul>
 </nav>
 
-## Results
-
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/fits_to_data.png" style="display: block; margin: auto;" />
 
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/lambdas.png" style="display: block; margin: auto;" />

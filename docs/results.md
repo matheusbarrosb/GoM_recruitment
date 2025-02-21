@@ -7,4 +7,4 @@ output: html_document
 
 ## Results
 
-![Fits to data](Figures/fits_to_data.png)
+![Fits to data](../Figures/fits_to_data.png)

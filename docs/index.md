@@ -4,6 +4,19 @@ output:
   html_document: default
   pdf_document: default
 ---
+
+<nav>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li>
+      <a href="#">Sections</a>
+      <ul>
+        <li><a href="results.html">Results</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
 # **The Multivariate Autoregressive State Space Model (MARSS)**
 
 This project aims to model the interannual variation in recruitment dynamics for several ecologically, economically important fish species. 

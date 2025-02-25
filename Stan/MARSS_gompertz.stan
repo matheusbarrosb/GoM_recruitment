@@ -35,10 +35,14 @@ parameters {
   array [n_obsvar]real<lower=0>          sigma_obs;       // observation variation
   real<lower=0,upper=1>                  phi;
   matrix[K, S]                           B;               // coefficients
+  vector<lower=0,upper=1>[S] gomp_dd; 
+  vector<lower=0>[S] gomp_int; 
 
 }
 
 transformed parameters {
+  vector[S] K_gomp;
+  for(s in 1:S) K_gomp[s] = gomp_int[s]/gomp_dd[s];
   
   real<lower=0>          sigma_process_real = sigma_obs[1]*sigma_process[1];
   matrix[N, M]           pred;
@@ -73,7 +77,7 @@ for (k in 1:K) {
   for(t in 2:N) {
     for(s in 1:S) {
       // process equation
-      x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
+      x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s] + gomp_int[s] - gomp_dd[s]*x[t-1,s];
       //x[t,s] = x[t-1,s] + pro_dev[t-1,s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
 
       
@@ -103,12 +107,15 @@ model {
   
   for (k in 1:K) B[k,] ~ normal(0, 2);
   
-  for(i in 1:n_obsvar) sigma_obs[i] ~ gamma(2, 2); 
-  
+  for(i in 1:n_obsvar) sigma_obs[i]     ~ gamma(2, 2); 
   for(s in 1:n_provar) sigma_process[s] ~ gamma(2, 2); 
   
   for(i in 1:n_trends) U[i] ~ normal(0, 0.1); 
   
+  for(s in 1:S) {
+     gomp_dd[s]  ~ beta(1,8);
+     gomp_int[s] ~ normal(2,1) T[0,1e2];
+  }
   
   if(est_nu == 1) {
     

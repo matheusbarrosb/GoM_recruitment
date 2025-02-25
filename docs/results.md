@@ -18,7 +18,10 @@ output: html_document
 </nav>
 
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/fits_to_data.png" style="display: block; margin: auto;" />
+**Figure 1** Estimated (red line) and observed (black line + points) recruitment trends for 23 fish species in the Gulf of Mexico. The mean recruitment index is scaled by the mean abundances for each time series. 
 
-<img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/lambdas.png" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/lambdas.png" style="display: block; margin: auto; width: 60%; height: auto;" />
+**Figure 2** Estimated mean (points) and standard errors (black lines) for the population growth rates ($\bar{\lambda}_{s}$) of 23 fish species in the Gulf of Mexico. Negative $\bar{\lambda}_{s}$ values denote overall declines in recruitment over the length of the time series.
 
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/covariates.png" style="display: block; margin: auto;" />
+**Figure 3** Estimated effects of covariates on the estimated recruitment trends ($\beta_{k,s}$) of 23 fish species in the Gulf of Mexico.

@@ -1,4 +1,4 @@
-extract_indices = function(parameter_name) {
+extract_indices = function(parameter_name, par = NULL) {
   
   indices = gsub("pred\\[|\\]", "", parameter_name)
   

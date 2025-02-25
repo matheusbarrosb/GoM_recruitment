@@ -36,7 +36,7 @@ plot_fits_to_data = function(stan_input, fit, species_list) {
   
   filtered_data$spps = spps
   filtered_data$spps = sapply(filtered_data$spps, capitalize_first_word)
-  filtered_data$year = as.numeric(filtered_data$year_index) + 1981
+  filtered_data$year = as.numeric(filtered_data$year_index) + 1980
   filtered_data$obs  = stan_input$stan_input$y
  
   filtered_data %>%

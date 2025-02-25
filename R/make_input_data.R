@@ -83,16 +83,22 @@ make_input_data = function(raw_data,
   }
   
   # standardization ------------------------------------------------------------
+  Ny = df_filled %>%
+    group_by(species) %>%
+    summarise(n_distinct(year))
+  
+  Ny = as.numeric(unlist(Ny[,2]))
+  
   if (standardize == TRUE) {
     
-    means   = rep(NA, S)
-    split_y = list()
-    for (i in 1:S) means[i] = bin_mean(y, every = N)[i]
+    #means   = rep(NA, S)
+    #for (i in 1:S) means[i] = bin_mean(y, every = N)[i]
+    means = irregular_bin_mean(y, intervals = Ny, na.rm = TRUE)
     
-    split_y = split(y, ceiling(seq_along(y)/N))
+    split_y = split_at_intervals(y, intervals = Ny)
     
     split_y_std = list()
-    for (i in 1:S) split_y_std[[i]] = as.numeric(unlist(split_y[i]))/means[i]
+    for (i in 1:S) split_y_std[[i]] = as.numeric(unlist(split_y[[i]]))/means[i]
     
     y = unlist(split_y_std)
 

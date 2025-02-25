@@ -1,34 +1,41 @@
-make_input_data = function(raw_data, species_list, standardize = TRUE, shared_trends = FALSE) {
+make_input_data = function(raw_data, 
+                           species_list,
+                           standardize = TRUE,
+                           shared_trends = FALSE,
+                           standardize_covariates = TRUE,
+                           overdispersion = FALSE) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
   if(!require(Thermimage)) install.packages("Thermimage") else require(Thermimage)
   
+  # Get temperature threshold for heatwave metrics -----------------------------
+  temp_threshold = get_temp_threshold(raw_data$Temp_C)
+  
   # Format data ----------------------------------------------------------------
   filtered_data = raw_data %>%
     filter(Genus_species %in% species_list) %>%
-    group_by(Genus_species, YEAR, MONTH, STATION, DAY) %>%
-    summarise(n = Total_NUM,
-              sal  = SAL,
-              do   = O2_MG_L,
-              temp = Temp_C) %>%
-    na.exclude() %>%
+    mutate(Date = as.Date(paste(YEAR, MONTH, DAY, sep = "-"))) %>%
     group_by(Genus_species, YEAR) %>%
-    summarise(mean_count = mean(n, na.rm = TRUE),
-              sal        = mean(sal, na.rm = TRUE),
-              do         = mean(do, na.rm = TRUE),
-              temp       = mean(temp, na.rm = TRUE))
+    summarise(n          = mean(Total_NUM, na.rm = TRUE),
+              sal        = mean(SAL, na.rm = TRUE),
+              do         = mean(O2_MG_L, na.rm = TRUE),
+              temp       = mean(Temp_C, na.rm = TRUE),
+              maxTemp    = max(Temp_C, na.rm = TRUE),
+              days_above = n_distinct(Date[Temp_C > temp_threshold])) 
   
-  names(filtered_data) = c("species", "year", "y", "sal", "do", "temp")
+  names(filtered_data) = c("species", "year", "y", "sal", "do", "temp", "max_temp", "days_above")
   
   # fill in missing years with NAs ---------------------------------------------
-  min_year  = 1981
-  max_year  = 2018
-  all_years = expand.grid(species = unique(filtered_data$species),
-                          year    = min_year:max_year)
+  # min_year  = 1981
+  # max_year  = 2018
+  # all_years = expand.grid(species = unique(filtered_data$species),
+  #                         year    = min_year:max_year)
+  # 
+  # df_filled = all_years %>%
+  #   left_join(filtered_data, by = c("species", "year")) %>%
+  #   arrange(species, year)
   
-  df_filled = all_years %>%
-    left_join(filtered_data, by = c("species", "year")) %>%
-    arrange(species, year)
+  df_filled = filtered_data
   
   # Data inputation ------------------------------------------------------------
   y = df_filled$y
@@ -44,7 +51,7 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   
   N            = length(unique(df_filled$year))
   M            = length(unique(df_filled$species))
-  X            = model.matrix(~ df_filled$sal + df_filled$do + df_filled$temp)
+  X            = model.matrix(~ df_filled$sal + df_filled$do + df_filled$temp + df_filled$max_temp + df_filled$days_above)
   K            = dim(X)[2]
   y            = y
   states       = 1:M
@@ -54,15 +61,25 @@ make_input_data = function(raw_data, species_list, standardize = TRUE, shared_tr
   obsVariances = rep(1, M)
   trends       = proVariances
   est_trend    = ifelse(shared_trends == TRUE, 1, 0)
-  est_nu       = 1
+  est_nu       = ifelse(overdispersion == TRUE, 1, 0)
   family       = 1
   n_provar     = 1
   n_trends     = S
   n_pos        = dim(df_filled)[1]
   
+  # Standardize covariates -----------------------------------------------------
+  if (standardize_covariates == TRUE) {
+    
+    for (k in 1:K) {
+      
+      X[,k] = X[,k]/mean(X[,k], na.rm = TRUE) 
+      
+    }
+  }
+  
   # Data inputation ------------------------------------------------------------
   for (k in 1:K) {
-    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] + rnorm(1, 0, 0.05) # missing value = value at t-1
+    for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] + rnorm(1, 0, 0.05) # missing value = value at t-1 + random error
   }
   
   # standardization ------------------------------------------------------------

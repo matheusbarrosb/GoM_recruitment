@@ -383,43 +383,64 @@ modelled with additional error to account for the inherent variability
 related to sampling errors. The model also includes the effects of
 covariates on the unobserved population abundance.</p>
 <p>The model can be described as follows:</p>
-<p><span class="math display">\[\begin{align}
-
-y_{t} = Z_{y}x_{t} + \sigma_{obs}
-
-\end{align}\]</span></p>
-<p><span class="math display">\[\begin{align}
-
-\sigma_{obs} \sim MVN(0, Q_{t})
-
-\end{align}\]</span></p>
-<p><span class="math display">\[\begin{align}
-
-x_{t} = x_{t-1} + \beta_{k,s}X_{t,k} + \sigma_{pr}
-
-\end{align}\]</span></p>
-<p><span class="math display">\[\begin{align}
-
-\sigma_{pr} \sim MVN(0, R_{t})
-
-\end{align}\]</span></p>
+<p><span class="math display">\[y_{t,s} = x_{t,s} + \nu_{t}\]</span></p>
+<p><span class="math display">\[\nu_{t} \sim N(0,
+\sigma_{obs})\]</span></p>
+<p><span class="math display">\[\sigma_{obs} \sim \Gamma(2,
+2)\]</span></p>
+<p><span class="math display">\[x_{t} = x_{t-1} + \beta_{k,s}X_{t,k} +
+\epsilon_{t}\]</span></p>
+<p><span class="math display">\[\epsilon_{t} \sim N(0,
+\sigma_{pr})\]</span></p>
+<p><span class="math display">\[\sigma_{pr} \sim \Gamma(2,
+2)\]</span></p>
+<p><span class="math display">\[\beta_{k,s} \sim N(0, 2)\]</span></p>
+<p>Where:</p>
 <p><span class="math inline">\(y_{t}\)</span> = observed mean count at
 year <em>t</em><br />
-<span class="math inline">\(\sigma_{obs}\)</span> = observation
-variance<br />
-<span class="math inline">\(Q_{t}\)</span> = observation variance
-covariance matrix<br />
+<span class="math inline">\(\nu_{t}\)</span> = observation error at year
+<em>t</em><br />
+<span class="math inline">\(\sigma_{obs}\)</span> = observation error
+standard deviation<br />
 <span class="math inline">\(x_{t}\)</span> = unobserved state
 (<em>i.e.</em> the true population abundance at year <em>t</em>)<br />
+<span class="math inline">\(\epsilon_{t}\)</span> = process error at
+year <em>t</em><br />
+<span class="math inline">\(\sigma_{pr}\)</span> = process standard
+deviation<br />
 <span class="math inline">\(\beta_{k,s}\)</span> = effects of covariate
 <em>k</em> on species <em>s</em><br />
 <span class="math inline">\(X_{t,k}\)</span> = design matrix of
 covariates<br />
-<span class="math inline">\(\sigma_{pr}\)</span> = process
-variance<br />
-<span class="math inline">\(R_{t}\)</span> = process variance covariance
-matrix<br />
 </p>
+<p>The model is fitted using a Bayesian approach through the NUTS (No
+U-Turn Sampler) algorithm in the “Stan” software. The full joint
+likelihood of the model can be expressed as follows:</p>
+<p><span class="math display">\[L(\theta, x_{1:N,1:S}|y_{1:N,1:S}) =
+\prod_{t=1}^{N}\prod_{s=1}^{S}g(y_{t,s} | x_{t,s},
+\theta_{obs})f(x_{t,s} | x_{t-1,s}, \theta_{p})\]</span></p>
+<p>Where:</p>
+<p><span class="math inline">\(\theta\)</span> = model parameters<br />
+<span class="math inline">\(\theta_{obs}\)</span> = observation
+component parameters<br />
+<span class="math inline">\(\theta_{p}\)</span> = observation component
+parameters<br />
+</p>
+<p>Average growth rates through time can be easily estimated from the
+posterior state predictions by calculating the finite differences
+between predicted states at each time step as follows:</p>
+<p><span class="math display">\[\begin{align}
+
+\lambda_{t,s} = \frac{x_{t,s} - x_{t-1,s}}{t - (t-1)}
+
+\end{align}\]</span></p>
+<p><span class="math display">\[\bar{\lambda}_{s} =
+\sum_{t=1}^{N}\frac{\lambda_{t,s}}{N}\]</span></p>
+<p>Where:</p>
+<p><span class="math inline">\(\lambda_{t,s}\)</span> = growth rate of
+species <em>s</em> at year <em>t</em><br />
+<span class="math inline">\(x_{t,s}\)</span> = predicted state of
+species <em>s</em> at year <em>t</em></p>
 </div>
 
 

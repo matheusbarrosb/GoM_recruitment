@@ -28,37 +28,64 @@ The model also includes the effects of covariates on the unobserved population a
 
 The model can be described as follows:
 
-\begin{align}
 
-y_{t} = Z_{y}x_{t} + \sigma_{obs}
 
-\end{align}
+$$y_{t,s} = x_{t,s} + \nu_{t}$$
 
-\begin{align}
+$$\nu_{t} \sim N(0, \sigma_{obs})$$
 
-\sigma_{obs} \sim MVN(0, Q_{t})
+$$\sigma_{obs} \sim \Gamma(2, 2)$$
 
-\end{align}
+$$x_{t} = x_{t-1} + \beta_{k,s}X_{t,k} + \epsilon_{t}$$
 
-\begin{align}
+$$\epsilon_{t} \sim N(0, \sigma_{pr})$$
 
-x_{t} = x_{t-1} + \beta_{k,s}X_{t,k} + \sigma_{pr}
+$$\sigma_{pr} \sim \Gamma(2, 2)$$
 
-\end{align}
+$$\beta_{k,s} \sim N(0, 2)$$
 
-\begin{align}
-
-\sigma_{pr} \sim MVN(0, R_{t})
-
-\end{align}
+Where:
 
 $y_{t}$ = observed mean count at year _t_ \
-$\sigma_{obs}$ = observation variance \
-$Q_{t}$ = observation variance covariance matrix \
+$\nu_{t}$ = observation error at year _t_\
+$\sigma_{obs}$ = observation error standard deviation \
 $x_{t}$ = unobserved state (_i.e._ the true population abundance at year _t_) \
+$\epsilon_{t}$ = process error at year _t_ \
+$\sigma_{pr}$ = process standard deviation \
 $\beta_{k,s}$ = effects of covariate _k_ on species _s_ \
 $X_{t,k}$ = design matrix of covariates \
-$\sigma_{pr}$ = process variance \
-$R_{t}$ = process variance covariance matrix \
+
+The model is fitted using a Bayesian approach through the NUTS (No U-Turn Sampler) algorithm in the "Stan" software.
+The full joint likelihood of the model can be expressed as follows:
+
+$$L(\theta, x_{1:N,1:S}|y_{1:N,1:S}) = \prod_{t=1}^{N}\prod_{s=1}^{S}g(y_{t,s} | x_{t,s}, \theta_{obs})f(x_{t,s} | x_{t-1,s}, \theta_{p})$$
+
+Where:
+
+$\theta$ = model parameters \
+$\theta_{obs}$ = observation component parameters \
+$\theta_{p}$ = observation component parameters \
+
+Average growth rates through time can be easily estimated from the posterior state predictions by calculating the finite differences
+between predicted states at each time step as follows:
+
+
+\begin{align}
+
+\lambda_{t,s} = \frac{x_{t,s} - x_{t-1,s}}{t - (t-1)}
+
+\end{align}
+
+
+$$\bar{\lambda}_{s} = \sum_{t=1}^{N}\frac{\lambda_{t,s}}{N}$$
+
+Where:
+
+$\lambda_{t,s}$ = growth rate of species _s_ at year _t_ \
+$x_{t,s}$ = predicted state of species _s_ at year _t_
+
+
+
+
 
 

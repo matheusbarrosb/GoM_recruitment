@@ -23,5 +23,8 @@ output: html_document
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/lambdas.png" style="display: block; margin: auto; width: 60%; height: auto;" />
 **Figure 2** Estimated mean (points) and standard errors (black lines) for the population growth rates ($\bar{\lambda}_{s}$) of 23 fish species in the Gulf of Mexico. Negative $\bar{\lambda}_{s}$ values denote overall declines in recruitment over the length of the time series.
 
+<img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/lambda_ts.png" style="display: block; margin: auto;" />
+**Figure 3** Time series of population growth rates ($\lambda_{t,s}$) for 23 fish species in the Gulf of Mexico.
+
 <img src="https://raw.githubusercontent.com/matheusbarrosb/GoM_recruitment/main/Figures/covariates.png" style="display: block; margin: auto;" />
-**Figure 3** Estimated effects of covariates on the estimated recruitment trends ($\beta_{k,s}$) of 23 fish species in the Gulf of Mexico.
+**Figure 4** Estimated effects of covariates on the estimated recruitment trends ($\beta_{k,s}$) of 23 fish species in the Gulf of Mexico.

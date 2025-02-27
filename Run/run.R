@@ -80,8 +80,3 @@ plot_covariate_effects(fit          = fit,
                        stan_input   = input_data$stan_input)
 ggsave("covariates.png", width = 10.4, height = 5.5, path = figure_directory)
 ggsave("covariates.pdf", width = 10.4, height = 5.5, path = figure_directory)
-
-
-
-
-

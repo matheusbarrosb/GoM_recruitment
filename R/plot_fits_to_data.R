@@ -1,4 +1,4 @@
-plot_fits_to_data = function(stan_input, fit, species_list) {
+plot_fits_to_data = function(stan_input, fit, species_list, log = FALSE) {
   
   if(!require(stringr)) install.packages("stringr") else require(stringr)
   
@@ -39,21 +39,39 @@ plot_fits_to_data = function(stan_input, fit, species_list) {
   filtered_data$year = as.numeric(filtered_data$year_index) + 1980
   filtered_data$obs  = stan_input$stan_input$y
  
+  if (log == TRUE) {
   filtered_data %>%
     ggplot() +
     geom_line(aes(x = year, y = median, color = "Estimated trend"),
               linetype = 1,
               linewidth = 1) +
-    geom_line(aes(x = year, y = obs), color = "black") +
-    geom_point(aes(x = year, y = obs), color = "black", shape = 1) +
+    geom_line(aes(x = year, y = log(obs)), color = "black") +
+    geom_point(aes(x = year, y = log(obs)), color = "black", shape = 1) +
     geom_ribbon(aes(ymin = q5, ymax = q95, x = year), alpha = 0.2) +
     xlab("Year") +
     ylab("Mean recruitment index") +
     facet_wrap(~spps, scales = "free_y") +
-    theme_minimal() +
+    custom_theme() +
     theme(legend.title = element_blank(),
           legend.position = "top",
           strip.text.x = element_text(face = "italic"))
+  } else {
+    filtered_data %>%
+      ggplot() +
+      geom_line(aes(x = year, y = median, color = "Estimated trend"),
+                linetype = 1,
+                linewidth = 1) +
+      geom_line(aes(x = year, y = obs), color = "black") +
+      geom_point(aes(x = year, y = obs), color = "black", shape = 1) +
+      geom_ribbon(aes(ymin = q5, ymax = q95, x = year), alpha = 0.2) +
+      xlab("Year") +
+      ylab("Mean recruitment index") +
+      facet_wrap(~spps, scales = "free_y") +
+      custom_theme() +
+      theme(legend.title = element_blank(),
+            legend.position = "top",
+            strip.text.x = element_text(face = "italic"))
+  }
   
 }
 

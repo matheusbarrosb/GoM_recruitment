@@ -3,7 +3,9 @@ make_input_data = function(raw_data,
                            standardize = TRUE,
                            shared_trends = FALSE,
                            standardize_covariates = TRUE,
-                           overdispersion = FALSE) {
+                           log_covariates = FALSE,
+                           overdispersion = FALSE,
+                           family = NULL) {
   
   if(!require(dplyr)) install.packages("dplyr") else require(dplyr)
   if(!require(Thermimage)) install.packages("Thermimage") else require(Thermimage)
@@ -62,25 +64,22 @@ make_input_data = function(raw_data,
   trends       = proVariances
   est_trend    = ifelse(shared_trends == TRUE, 1, 0)
   est_nu       = ifelse(overdispersion == TRUE, 1, 0)
-  family       = 1
+  family       = family
   n_provar     = 1
   n_trends     = S
   n_pos        = dim(df_filled)[1]
   
   # Standardize covariates -----------------------------------------------------
   if (standardize_covariates == TRUE) {
-    
-    for (k in 1:K) {
-      
-      X[,k] = X[,k]/mean(X[,k], na.rm = TRUE) 
-      
-    }
+    for (k in 1:K) X[,k] = X[,k]/mean(X[,k], na.rm = TRUE) 
   }
   
   # Data inputation ------------------------------------------------------------
   for (k in 1:K) {
     for (i in 1:n_pos) if (is.na(X[i,k])) X[i,k] = X[i-1,k] + rnorm(1, 0, 0.05) # missing value = value at t-1 + random error
   }
+  
+  if (log_covariates == TRUE) X = log(X + 1e-6) # add small value to avoid log(0)
   
   # standardization ------------------------------------------------------------
   Ny = df_filled %>%

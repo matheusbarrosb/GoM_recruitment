@@ -1,6 +1,6 @@
 plot_covariate_effects = function(fit, species_list, stan_input) {
   
-  B = fit$summary(variables = "B", ~ quantile(.x, probs = c(0.5, 0.4, 0.6)))
+  B = fit$summary(variables = "B", ~ quantile(.x, probs = c(0.5, 0.2, 0.8)))
   names(B) = c("parameter", "mean", "q20", "q80")
   
   spps = list()
@@ -32,7 +32,7 @@ plot_covariate_effects = function(fit, species_list, stan_input) {
     facet_wrap(~spps, ncol = 6, scales = "free_x") +
     coord_flip() +
     scale_x_discrete(labels = labels) +
-    theme_minimal() +
+    custom_theme() +
     theme(strip.text.x = element_text(face = "italic"),
           legend.title = element_blank(),
           legend.position = "top") +

@@ -41,7 +41,7 @@ plot_lambdas = function(fit, species_list, stan_input, plot_type = NULL) {
     ggplot(aes(x = year, y = median)) +
     geom_line() +
     geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-    theme_minimal() +
+    custom_theme() +
     theme(legend.position = "none",
           strip.text.x = element_text(face = "italic")) +
     facet_wrap(~spps, scales = "free_y") +
@@ -64,7 +64,7 @@ plot_lambdas = function(fit, species_list, stan_input, plot_type = NULL) {
       geom_errorbar(aes(ymin = lambda - se, ymax = lambda + se), width = 0.1) +
       geom_point(aes(fill = trend), shape = 21, size = 2) +
       coord_flip() +
-      theme_minimal() +
+      custom_theme() +
       theme(axis.text.y = element_text(face = "italic"),
             legend.title = element_blank(),
             legend.position = "top") +

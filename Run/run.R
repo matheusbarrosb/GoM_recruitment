@@ -21,7 +21,7 @@ selected_spps = list(spp_list[33], spp_list[34], spp_list[35], spp_list[59],
                      spp_list[263], spp_list[264], spp_list[283], spp_list[297],
                      spp_list[365], spp_list[376], spp_list[480])
 
-#selected_spps = list(spp_list[33], spp_list[34], spp_list[35], spp_list[262], spp_list[365])
+#selected_spps = list(spp_list[33], spp_list[262])
 
 # Make input data for model ----------------------------------------------------
 input_data = make_input_data(raw_data               = raw_data,
@@ -29,7 +29,10 @@ input_data = make_input_data(raw_data               = raw_data,
                              standardize            = TRUE, 
                              shared_trends          = FALSE,
                              standardize_covariates = FALSE,
-                             overdispersion         = FALSE)
+                             log_covariates         = FALSE,
+                             overdispersion         = FALSE,
+                             family                 = 1 # 1 = gaussian, 4 = gamma, 5 = lognormal
+                             )
 
 # Configure and fit model ------------------------------------------------------
 model_directory = file.path(here::here(), "Stan", "MARSS_gompertz.stan")
@@ -40,8 +43,8 @@ fit = model_file$sample(
   seed            = 2025,
   chains          = 2,
   parallel_chains = 2,
-  iter_warmup     = 200,
-  iter_sampling   = 1000,
+  iter_warmup     = 500,
+  iter_sampling   = 2000,
   adapt_delta     = 0.99,
   step_size       = 0.05,
   refresh         = 10,   # refresh output progress display every X iterations
@@ -53,7 +56,8 @@ figure_directory = file.path(here::here(), "Figures")
 
 plot_fits_to_data(stan_input   = input_data,
                   fit          = fit,
-                  species_list = selected_spps)
+                  species_list = selected_spps,
+                  log          = FALSE)
 ggsave("fits_to_data.png", width = 9.2, height = 5.5, path = figure_directory)
 ggsave("fits_to_data.pdf", width = 9.2, height = 5.5, path = figure_directory)
 

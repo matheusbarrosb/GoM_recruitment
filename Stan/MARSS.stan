@@ -21,6 +21,7 @@ data {
   vector[n_pos]             y;              // data
   int                       family;         // 1 = normal, 2 = binomial, 3 = poisson, 4 = gamma, 5 = lognormal
   matrix[n_pos, K]          X;              // design matrix of covariates
+  //array [S]real             x0_obs; // initial state observations
   
 }
 
@@ -28,7 +29,7 @@ parameters {
   
   vector[S]                              x0;              // initial states
   vector<lower=2>[est_nu]                nu;              // nu, constrainted to be > 2
-  matrix <lower=-3,upper=3>[N-1,S]       pro_dev;         // process deviations
+  matrix <lower=-3,upper=3>[N,S]       pro_dev;           // process deviations
   vector[n_trends]                       U;
   vector[n_A]                            A; 
   array [n_provar]real<lower=0,upper=1>  sigma_process;   // process variation (SD)
@@ -72,16 +73,12 @@ transformed parameters {
 for (k in 1:K) {
   for(t in 2:N) {
     for(s in 1:S) {
-      // process equation
-      x[t,s] = x[t-1,s] + pro_dev[t-1,s] * sigma_process[proVariances[s]] * sigma_obs[1] + X[t,k] * B[k,s];
-      //x[t,s] = x[t-1,s] + pro_dev[t-1,s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
 
+    // x[t,s] = log(exp(x[t-1,s] + Uvec[s] + pro_dev[t,s]*sigma_process[proVariances[s]]) + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s]);
+     //x[t,s] = x[t-1,s] + Uvec[s] + pro_dev[t,s]*sigma_process[proVariances[s]] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
       
-      if(est_trend == 1) {
+      x[t, s] = x[t-1, s] + Uvec[s] + pro_dev[t, s] * sigma_process[proVariances[s]] + dot_product(X[col_indx_pos[t], ], B[, s]);
       
-        x[t,s] = x[t-1,s] * Uvec[s] + X[col_indx_pos[t], row_indx_pos[t]] * B[k,s];
-     
-        }
       }
     }
   }
@@ -99,25 +96,33 @@ for (k in 1:K) {
 model {
 
 // PRIORS ---------------------------------------------------------------------
-  phi ~ beta(1.5,1.5) T[1e-4,1];
+
+  phi ~ normal(0,1);
   
-  for (k in 1:K) for(s in 1:S) B[k,s] ~ normal(0, 5);
+  // priors for covariate matrix
+  for (k in 1:K) {
+    for(s in 1:S) {
+      
+      B[k,s] ~ normal(0,2);
   
-  for(i in 1:n_obsvar) sigma_obs[i] ~ gamma(2, 2); 
+    }
+  }
   
-  for(s in 1:n_provar) sigma_process[s] ~ gamma(2, 2); 
+  for(i in 1:n_obsvar) sigma_obs[i] ~ gamma(1.5, 0.2); 
   
-  for(i in 1:n_trends) U[i] ~ normal(0, 0.1); 
+  for(s in 1:n_provar) sigma_process[s] ~ gamma(1.5, 0.2); 
+  
+  for(i in 1:n_trends) U[i] ~ normal(0, 1); 
   
   
   if(est_nu == 1) {
     
-    nu[1] ~ gamma(2, 0.1);
+    nu[1] ~ gamma(1, 0.1);
     
   for(t in 1:(N-1)) {
       for(s in 1:S) {
         
-        pro_dev[t,s] ~ student_t(nu[1], 0, 2);
+        pro_dev[t,s] ~ student_t(nu[1], 0, 1);
         
       }
     }
@@ -129,10 +134,10 @@ model {
       
       }
       
-    for(t in 2:(N-1)) {
+    for(t in 2:(N)) {
       for(s in 1:S) {
         
-        pro_dev[t,s] ~ normal((2*phi-1)*pro_dev[t-1,s],1);
+        pro_dev[t,s] ~ normal(phi*pro_dev[t-1,s],2);
         
       }
     }

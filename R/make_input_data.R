@@ -1,6 +1,7 @@
 make_input_data = function(raw_data, 
                            species_list,
                            standardize = TRUE,
+                           log = FALSE,
                            shared_trends = FALSE,
                            standardize_covariates = TRUE,
                            log_covariates = FALSE,
@@ -71,7 +72,7 @@ make_input_data = function(raw_data,
   
   # Standardize covariates -----------------------------------------------------
   if (standardize_covariates == TRUE) {
-    for (k in 1:K) X[,k] = X[,k]/mean(X[,k], na.rm = TRUE) 
+    for (k in 1:K) X[,k] = X[,k] - mean(X[,k], na.rm = TRUE) 
   }
   
   # Data inputation ------------------------------------------------------------
@@ -80,6 +81,11 @@ make_input_data = function(raw_data,
   }
   
   if (log_covariates == TRUE) X = log(X + 1e-6) # add small value to avoid log(0)
+  
+  # add error message if standardization and log = TRUE
+  if (standardize_covariates == TRUE & log_covariates == TRUE) {
+    stop("Cannot standardize and log-transform covariates at the same time.")
+  }
   
   # standardization ------------------------------------------------------------
   Ny = df_filled %>%
@@ -97,15 +103,39 @@ make_input_data = function(raw_data,
     split_y = split_at_intervals(y, intervals = Ny)
     
     split_y_std = list()
-    for (i in 1:S) split_y_std[[i]] = as.numeric(unlist(split_y[[i]]))/means[i]
+    for (i in 1:S) split_y_std[[i]] = as.numeric(unlist(split_y[[i]])) / means[i]
     
     y = unlist(split_y_std)
 
   } else y = y
   
+  # log ------------------------------------------------------------------------
+  if (log == TRUE) {
+
+    y = log(y + 1e-6) # add small value to avoid log(0)
+
+  }
+  
   # indexing -------------------------------------------------------------------
   row_indx_pos = as.numeric(as.factor(df_filled$species))
   col_indx_pos = as.numeric(as.factor(df_filled$year))
+  
+  # initial state priors -------------------------------------------------------
+  # grab the first observation for each species
+  x0_obs = rep(NA, S)
+  for (i in 1:length(species_list)) {
+    
+    if (standardize) {
+      
+      x0_obs[i] = df_filled$y[df_filled$species == species_list[[i]]][1] / means[i]
+      
+    } else if (log == TRUE) {
+      
+      x0_obs[i] = log(df_filled$y[df_filled$species == species_list[[i]]][1] + 1e-6) # add small value to avoid log(0)
+      
+    } else x0_obs[i] = df_filled$y[df_filled$species == species_list[[i]]][1]
+    
+  }
   
   # ----------------------------------------------------------------------------
   est_A = rep(1, M)
@@ -125,6 +155,7 @@ make_input_data = function(raw_data,
     N            = N,
     M            = M,
     y            = y,
+    x0_obs       = x0_obs,
     X            = X,
     K            = K,
     states       = states,

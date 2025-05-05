@@ -21,13 +21,14 @@ selected_spps = list(spp_list[33], spp_list[34], spp_list[35], spp_list[59],
                      spp_list[263], spp_list[264], spp_list[283], spp_list[297],
                      spp_list[365], spp_list[376], spp_list[480])
 
-#selected_spps = list(spp_list[33], spp_list[262])
+#selected_spps = list(spp_list[70], spp_list[84], spp_list[91])
 
 # Make input data for model ----------------------------------------------------
 input_data = make_input_data(raw_data               = raw_data,
                              species_list           = selected_spps,
-                             standardize            = TRUE, 
-                             shared_trends          = FALSE,
+                             standardize            = TRUE,
+                             log                    = FALSE,
+                             shared_trends          = TRUE,
                              standardize_covariates = FALSE,
                              log_covariates         = FALSE,
                              overdispersion         = FALSE,
@@ -35,20 +36,20 @@ input_data = make_input_data(raw_data               = raw_data,
                              )
 
 # Configure and fit model ------------------------------------------------------
-model_directory = file.path(here::here(), "Stan", "MARSS_gompertz.stan")
+model_directory = file.path(here::here(), "Stan", "MARSS.stan")
 model_file      = cmdstan_model(model_directory)
 
 fit = model_file$sample(
   data            = input_data$stan_input,
   seed            = 2025,
-  chains          = 2,
-  parallel_chains = 2,
-  iter_warmup     = 500,
-  iter_sampling   = 2000,
+  chains          = 1,
+  parallel_chains = 3,
+  iter_warmup     = 1000,
+  iter_sampling   = 5000,
   adapt_delta     = 0.99,
   step_size       = 0.05,
   refresh         = 10,   # refresh output progress display every X iterations
-  max_treedepth   = 15    # I suggest a minimum of 15 to avoid convergence problems
+  max_treedepth   = 20    # I suggest a minimum of 15 to avoid convergence problems
 ); fit$cmdstan_diagnose() # check convergence diagnostics
 
 # Plot results -----------------------------------------------------------------

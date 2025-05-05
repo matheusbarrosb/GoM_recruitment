@@ -18,6 +18,9 @@ plot_fits_to_data = function(stan_input, fit, species_list, log = FALSE) {
     spp_index = spps_to_keep,
     year_index = years_to_keep
   )
+  
+  # preds$mean = exp(preds$mean)
+  # preds$median = exp(preds$median)
 
   filtered_data = preds %>%
     inner_join(keep_df, by = c("spp_index", "year_index"))

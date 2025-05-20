@@ -20,13 +20,17 @@ make_input_data = function(raw_data,
     mutate(Date = as.Date(paste(YEAR, MONTH, DAY, sep = "-"))) %>%
     group_by(Genus_species, YEAR) %>%
     summarise(n          = mean(Total_NUM, na.rm = TRUE),
+              se         = sd(Total_NUM, na.rm = TRUE)/sqrt(n()),
               sal        = mean(SAL, na.rm = TRUE),
               do         = mean(O2_MG_L, na.rm = TRUE),
               temp       = mean(Temp_C, na.rm = TRUE),
               maxTemp    = max(Temp_C, na.rm = TRUE),
               days_above = n_distinct(Date[Temp_C > temp_threshold])) 
   
-  names(filtered_data) = c("species", "year", "y", "sal", "do", "temp", "max_temp", "days_above")
+  names(filtered_data) = c(
+    "species", "year", "y", "se", "sal",
+    "do", "temp", "max_temp", "days_above"
+    )
   
   # fill in missing years with NAs ---------------------------------------------
   # min_year  = 1981

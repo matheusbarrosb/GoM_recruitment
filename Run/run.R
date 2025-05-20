@@ -2,6 +2,7 @@ require(here)
 require(dplyr)
 require(ggplot2)
 require(cmdstanr)
+require(GGally)
 
 # Load-in functions ------------------------------------------------------------
 function_directory = file.path(here::here(), "R/")
@@ -35,6 +36,8 @@ input_data = make_input_data(raw_data               = raw_data,
                              family                 = 1 # 1 = gaussian, 4 = gamma, 5 = lognormal
                              )
 
+ggpairs(input_data$df, columns = 4:8) # assess correlations between covariates
+
 # Configure and fit model ------------------------------------------------------
 model_directory = file.path(here::here(), "Stan", "MARSS.stan")
 model_file      = cmdstan_model(model_directory)
@@ -42,7 +45,7 @@ model_file      = cmdstan_model(model_directory)
 fit = model_file$sample(
   data            = input_data$stan_input,
   seed            = 2025,
-  chains          = 1,
+  chains          = 3,
   parallel_chains = 3,
   iter_warmup     = 1000,
   iter_sampling   = 5000,
